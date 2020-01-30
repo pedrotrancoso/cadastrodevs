@@ -1,42 +1,52 @@
-import React from 'react';
-import Header from './Header';
-//import logo from './logo.svg';
-//import './App.css';
+import React, {useState, useEffect} from 'react';
+import api from './services/api';
+
+import './global.css';
+import './App.css';
+import './Sidebar.css';
+import './Main.css';
+
+import DevForm from './components/DevForm';
+import DevItem from './components/DevItem';
 
 // Compenente: Bloco isolado de HTML, CSS e JS, o qual não interfere no restante da aplicação
 // Prioridade: Informações que um componente PAI passa para um componente FILHO
-// Estado: 
-
+// Estado: Informações mantidas pelo componente (Lembrar conceito: imutabilidade)
+ 
 
 function App() {
-  const counter = 0;
-  
-  function incrementCounter(){
-    alert('Hello')
-  }
-  
-  return (
+  const [devs, setDevs] = useState([]);
 
-    <>
-    <h1>Contador: {counter}}</h1>
-    <button onClick={incrementCounter}>Incrementar</button>
-    </>
-    /*<div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div> */
+  useEffect(() => {
+    async function loadDevs(){
+      const response = await api.get('/devs');
+
+      setDevs(response.data);
+    }
+    loadDevs();
+  }, []);
+
+  async function handleAddDev(data){
+    const response = await api.post('/devs/incluir', data)
+   
+    setDevs([...devs, response.data]);
+  }
+
+  return (
+    <div id="app">
+      <aside>
+       <strong>Cadastrar</strong>
+       <DevForm onSubmit={handleAddDev} />
+      </aside>
+
+      <main>
+        <ul>
+          {devs.map(dev => (
+              <DevItem key={dev._id} dev={dev} />
+          ))}
+        </ul>
+      </main>
+    </div>
   );
 }
 
